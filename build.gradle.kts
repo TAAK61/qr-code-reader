@@ -1,10 +1,12 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.9.10"
     application
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.jetbrains.dokka") version "1.9.10"
 }
 
-group = "com.qrreader"
+group = "com.qrcoder"
 version = "1.0.0"
 
 repositories {
@@ -12,26 +14,25 @@ repositories {
 }
 
 dependencies {
+    // ZXing for QR code processing
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.google.zxing:javase:3.5.2")
+    
+    // Kotlin standard library
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     
+    // Testing dependencies
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 }
 
 application {
     mainClass.set("MainKt")
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "11"
         freeCompilerArgs = listOf("-Xjsr305=strict")
@@ -42,20 +43,33 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.shadowJar {
-    archiveClassifier.set("")
-    archiveBaseName.set("qr-code-reader")
-    archiveVersion.set("1.0.0")
+// Generate documentation
+tasks.dokkaHtml.configure {
+    outputDirectory.set(buildDir.resolve("dokka"))
 }
 
-tasks.build {
-    dependsOn(tasks.shadowJar)
+// Create JAR with dependencies
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "MainKt"
+    }
+    
+    // Include dependencies in the JAR
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// Task to run the application
-tasks.register<JavaExec>("runApp") {
-    group = "application"
-    description = "Run the QR Code Reader application"
-    classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("MainKt")
+// Configure test reporting
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+// Add JaCoCo for code coverage
+apply(plugin = "jacoco")
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
