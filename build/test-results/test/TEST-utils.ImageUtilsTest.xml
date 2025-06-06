@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="utils.ImageUtilsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-06-06T10:53:58" hostname="ASUS-OF-TK" time="0.078">
+  <properties/>
+  <testcase name="testConvertToGrayscale()" classname="utils.ImageUtilsTest" time="0.075"/>
+  <testcase name="testEnhanceContrast()" classname="utils.ImageUtilsTest" time="0.002"/>
+  <system-out><![CDATA[[DEBUG_LOG] Grayscale test passed. RGB values: R=149, G=149, B=149
+[DEBUG_LOG] Original gray: 100
+[DEBUG_LOG] Enhanced contrast values: R=86, G=86, B=86
+[DEBUG_LOG] Expected value: 86
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
