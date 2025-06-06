@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Kotlin
+*.class
+*.jar
+!build/libs/qr-code-reader-*-all.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Test outputs
+test-results/
+test-reports/
+
+# Cache
+cache/
+.cache/

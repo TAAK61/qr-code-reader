@@ -14,7 +14,7 @@
 @rem limitations under the License.
 @rem
 
-@if "%DEBUG%" == "" @echo off
+@if "%DEBUG%"=="" @echo off
 @rem ##########################################################################
 @rem
 @rem  qr-code-reader startup script for Windows
@@ -25,7 +25,8 @@
 if "%OS%"=="Windows_NT" setlocal
 
 set DIRNAME=%~dp0
-if "%DIRNAME%" == "" set DIRNAME=.
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
 set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%..
 
@@ -33,14 +34,14 @@ set APP_HOME=%DIRNAME%..
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and QR_CODE_READER_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS=
+set DEFAULT_JVM_OPTS="--add-exports" "javafx.base/com.sun.javafx.runtime=ALL-UNNAMED"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
-if "%ERRORLEVEL%" == "0" goto execute
+if %ERRORLEVEL% equ 0 goto execute
 
 echo.
 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
@@ -67,21 +68,23 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\qr-code-reader-1.0.0.jar;%APP_HOME%\lib\javase-3.5.2.jar;%APP_HOME%\lib\core-3.5.2.jar;%APP_HOME%\lib\kotlin-stdlib-1.9.10.jar;%APP_HOME%\lib\jcommander-1.82.jar;%APP_HOME%\lib\jai-imageio-core-1.4.0.jar;%APP_HOME%\lib\kotlin-stdlib-common-1.9.10.jar;%APP_HOME%\lib\annotations-13.0.jar
+set CLASSPATH=%APP_HOME%\lib\qr-code-reader-2.0.0-dev.jar;%APP_HOME%\lib\kotlin-stdlib-1.9.10.jar;%APP_HOME%\lib\javase-3.5.2.jar;%APP_HOME%\lib\core-3.5.2.jar;%APP_HOME%\lib\javafx-fxml-17.0.2-win.jar;%APP_HOME%\lib\javafx-controls-17.0.2-win.jar;%APP_HOME%\lib\javafx-swing-17.0.2-win.jar;%APP_HOME%\lib\kotlin-stdlib-common-1.9.10.jar;%APP_HOME%\lib\annotations-13.0.jar;%APP_HOME%\lib\jcommander-1.82.jar;%APP_HOME%\lib\jai-imageio-core-1.4.0.jar;%APP_HOME%\lib\javafx-graphics-17.0.2-win.jar;%APP_HOME%\lib\javafx-base-17.0.2-win.jar
 
 
 @rem Execute qr-code-reader
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %QR_CODE_READER_OPTS%  -classpath "%CLASSPATH%" MainKt %*
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %QR_CODE_READER_OPTS%  -classpath "%CLASSPATH%" main.MainKt %*
 
 :end
 @rem End local scope for the variables with windows NT shell
-if "%ERRORLEVEL%"=="0" goto mainEnd
+if %ERRORLEVEL% equ 0 goto mainEnd
 
 :fail
 rem Set variable QR_CODE_READER_EXIT_CONSOLE if you need the _script_ return code instead of
 rem the _cmd.exe /c_ return code!
-if  not "" == "%QR_CODE_READER_EXIT_CONSOLE%" exit 1
-exit /b 1
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%QR_CODE_READER_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
 
 :mainEnd
 if "%OS%"=="Windows_NT" endlocal

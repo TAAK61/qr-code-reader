@@ -1,75 +1,66 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.9.10"
     application
-    id("org.jetbrains.dokka") version "1.9.10"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "com.qrcoder"
-version = "1.0.0"
+version = "2.0.0-dev"
 
 repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+// JavaFX configuration
+javafx {
+    version = "17.0.2"
+    modules("javafx.controls", "javafx.fxml", "javafx.swing")
+}
+
 dependencies {
-    // ZXing for QR code processing
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.google.zxing:javase:3.5.2")
     
-    // Kotlin standard library
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    // JavaFX dependencies for GUI (managed by plugin above)
+    implementation("org.openjfx:javafx-controls:17.0.2")
+    implementation("org.openjfx:javafx-fxml:17.0.2")
+    implementation("org.openjfx:javafx-swing:17.0.2")
     
-    // Testing dependencies
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.mockito:mockito-core:5.5.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("junit:junit:4.13.2")
 }
 
 application {
-    mainClass.set("MainKt")
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-    }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
-// Generate documentation
-tasks.dokkaHtml.configure {
-    outputDirectory.set(buildDir.resolve("dokka"))
-}
-
-// Create JAR with dependencies
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "MainKt"
-    }
+    mainClass.set("main.MainKt")
     
-    // Include dependencies in the JAR
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // JavaFX runtime arguments
+    applicationDefaultJvmArgs = listOf(
+        "--add-exports", "javafx.base/com.sun.javafx.runtime=ALL-UNNAMED"
+    )
 }
 
-// Configure test reporting
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "11"
 }
 
-// Add JaCoCo for code coverage
-apply(plugin = "jacoco")
+tasks.shadowJar {
+    archiveBaseName.set("qr-code-reader")
+    archiveVersion.set("2.0-dev")
+    archiveClassifier.set("all")
+}
 
-tasks.jacocoTestReport {
-    reports {
-        xml.required = true
-        html.required = true
+// JavaFX run configuration
+tasks.run.configure {
+    if (JavaVersion.current() >= JavaVersion.VERSION_11) {
+        jvmArgs = listOf(
+            "--module-path", System.getProperty("javafx.runtime.path", ""),
+            "--add-modules", "javafx.controls,javafx.fxml,javafx.swing"
+        )
     }
 }

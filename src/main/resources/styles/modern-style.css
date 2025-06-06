@@ -1,0 +1,236 @@
+/* Modern CSS styling for QR Code Reader GUI */
+
+/* Root styling */
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-background-color: #f8f9fa;
+}
+
+/* Tab styling */
+.tab-pane {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+}
+
+.tab {
+    -fx-background-color: #e9ecef;
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
+}
+
+.tab:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+
+.tab:hover {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+}
+
+/* Button styling */
+.button {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+}
+
+.button:hover {
+    -fx-background-color: #0056b3;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: #004085;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.2), 2, 0, 0, 1);
+}
+
+/* Success button */
+.button.success {
+    -fx-background-color: #28a745;
+}
+
+.button.success:hover {
+    -fx-background-color: #218838;
+}
+
+/* Danger button */
+.button.danger {
+    -fx-background-color: #dc3545;
+}
+
+.button.danger:hover {
+    -fx-background-color: #c82333;
+}
+
+/* Text area styling */
+.text-area {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px;
+}
+
+.text-area:focused {
+    -fx-border-color: #007bff;
+    -fx-border-width: 2px;
+}
+
+/* Table styling */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e9ecef;
+}
+
+/* List view styling */
+.list-view {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.list-cell:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+
+.list-cell:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+/* Progress bar styling */
+.progress-bar {
+    -fx-accent: #007bff;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #e9ecef;
+    -fx-background-radius: 4px;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: #007bff;
+    -fx-background-radius: 4px;
+}
+
+/* Toolbar styling */
+.tool-bar {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 8px;
+}
+
+/* Separator styling */
+.separator {
+    -fx-background-color: #dee2e6;
+}
+
+/* Label styling */
+.label {
+    -fx-text-fill: #495057;
+}
+
+.label.title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.label.subtitle {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c757d;
+}
+
+/* Scroll pane styling */
+.scroll-pane {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: white;
+}
+
+/* ImageView container */
+.image-container {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 3, 0, 0, 1);
+}
+
+/* Drop zone styling */
+.drop-zone {
+    -fx-border-color: #007bff;
+    -fx-border-width: 2px;
+    -fx-border-style: dashed;
+    -fx-background-color: rgba(0, 123, 255, 0.1);
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.drop-zone:hover {
+    -fx-background-color: rgba(0, 123, 255, 0.2);
+}
+
+/* Alert dialog styling */
+.alert {
+    -fx-background-color: white;
+}
+
+.alert .header-panel {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1px 0;
+}
+
+/* Status bar styling */
+.status-bar {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 5px 10px;
+}
+
+/* Responsive design for smaller screens */
+@media screen and (max-width: 800px) {
+    .button {
+        -fx-font-size: 12px;
+        -fx-padding: 6px 12px;
+    }
+    
+    .tab {
+        -fx-font-size: 12px;
+    }
+}

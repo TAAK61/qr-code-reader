@@ -1,4 +1,0 @@
-D[DEBUG_LOG] Grayscale test passed. RGB values: R=149, G=149, B=149
- [DEBUG_LOG] Original gray: 100
-8[DEBUG_LOG] Enhanced contrast values: R=86, G=86, B=86
- [DEBUG_LOG] Expected value: 86
