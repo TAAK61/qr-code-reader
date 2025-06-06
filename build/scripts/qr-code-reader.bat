@@ -34,7 +34,7 @@ set APP_HOME=%DIRNAME%..
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and QR_CODE_READER_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS=
+set DEFAULT_JVM_OPTS="--add-exports" "javafx.base/com.sun.javafx.runtime=ALL-UNNAMED"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
@@ -68,7 +68,7 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\qr-code-reader-1.0.0.jar;%APP_HOME%\lib\kotlin-stdlib-1.9.10.jar;%APP_HOME%\lib\javase-3.5.2.jar;%APP_HOME%\lib\core-3.5.2.jar;%APP_HOME%\lib\kotlin-stdlib-common-1.9.10.jar;%APP_HOME%\lib\annotations-13.0.jar;%APP_HOME%\lib\jcommander-1.82.jar;%APP_HOME%\lib\jai-imageio-core-1.4.0.jar
+set CLASSPATH=%APP_HOME%\lib\qr-code-reader-2.0.0-dev.jar;%APP_HOME%\lib\kotlin-stdlib-1.9.10.jar;%APP_HOME%\lib\javase-3.5.2.jar;%APP_HOME%\lib\core-3.5.2.jar;%APP_HOME%\lib\javafx-fxml-17.0.2-win.jar;%APP_HOME%\lib\javafx-controls-17.0.2-win.jar;%APP_HOME%\lib\javafx-swing-17.0.2-win.jar;%APP_HOME%\lib\kotlin-stdlib-common-1.9.10.jar;%APP_HOME%\lib\annotations-13.0.jar;%APP_HOME%\lib\jcommander-1.82.jar;%APP_HOME%\lib\jai-imageio-core-1.4.0.jar;%APP_HOME%\lib\javafx-graphics-17.0.2-win.jar;%APP_HOME%\lib\javafx-base-17.0.2-win.jar
 
 
 @rem Execute qr-code-reader

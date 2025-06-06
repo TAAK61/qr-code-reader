@@ -56,16 +56,16 @@ This document contains a prioritized list of tasks for improving the QR Code Rea
 
 ## User Experience
 
-41. [ ] Create a graphical user interface (GUI) for the application
-42. [ ] Implement drag-and-drop support for image files
-43. [ ] Add a preview of the processed image before QR code detection
-44. [ ] Implement a history feature to remember recently processed images
+41. [x] Create a graphical user interface (GUI) for the application
+42. [x] Implement drag-and-drop support for image files
+43. [x] Add a preview of the processed image before QR code detection
+44. [x] Implement a history feature to remember recently processed images
 45. [ ] Add support for reading QR codes from the clipboard
-46. [ ] Implement a batch mode for processing multiple files
+46. [x] Implement a batch mode for processing multiple files
 47. [ ] Add support for reading QR codes from a webcam
-48. [ ] Create a more user-friendly error reporting mechanism
+48. [x] Create a more user-friendly error reporting mechanism
 49. [ ] Add internationalization support for UI elements
-50. [ ] Implement keyboard shortcuts for common operations
+50. [x] Implement keyboard shortcuts for common operations
 
 ## Performance Optimization
 
