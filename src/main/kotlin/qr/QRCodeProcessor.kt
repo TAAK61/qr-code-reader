@@ -1,13 +1,61 @@
+package qr
+
+import utils.ImageUtils
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
+
 class QRCodeProcessor {
-    fun processImage(image: BufferedImage): String? {
-        // Implement image processing logic to enhance QR code detection
-        // This could include operations like resizing, filtering, etc.
+    
+    /**
+     * Traite une image pour améliorer la détection de QR codes
+     */
+    fun processImageForQR(inputFile: File, outputFile: File): Boolean {
+        return try {
+            val originalImage = ImageIO.read(inputFile)
+            val processedImage = processImage(originalImage)
+            
+            ImageIO.write(processedImage, "png", outputFile)
+            true
+        } catch (e: Exception) {
+            println("Erreur lors du traitement de l'image: ${e.message}")
+            false
+        }
+    }
+    
+    /**
+     * Applique des filtres pour améliorer la détection
+     */
+    private fun processImage(image: BufferedImage): BufferedImage {
+        var processed = image
         
-        // Placeholder for processed image
-        val processedImage = image // Replace with actual processing logic
+        // Conversion en niveaux de gris
+        processed = ImageUtils.convertToGrayscale(processed)
         
-        // Use QRCodeReader to decode the QR code from the processed image
-        val qrCodeReader = QRCodeReader()
-        return qrCodeReader.readQRCode(processedImage)
+        // Amélioration du contraste
+        processed = ImageUtils.enhanceContrast(processed)
+        
+        // Réduction du bruit
+        processed = ImageUtils.reduceNoise(processed)
+        
+        return processed
+    }
+    
+    /**
+     * Redimensionne une image si nécessaire
+     */
+    fun resizeImage(image: BufferedImage, maxWidth: Int, maxHeight: Int): BufferedImage {
+        val width = image.width
+        val height = image.height
+        
+        if (width <= maxWidth && height <= maxHeight) {
+            return image
+        }
+        
+        val ratio = minOf(maxWidth.toDouble() / width, maxHeight.toDouble() / height)
+        val newWidth = (width * ratio).toInt()
+        val newHeight = (height * ratio).toInt()
+        
+        return ImageUtils.resizeImage(image, newWidth, newHeight)
     }
 }

@@ -1,23 +1,34 @@
+import qr.QRCodeReader
+import java.io.File
+
 fun main() {
-    println("Welcome to the QR Code Reader!")
-    println("Please enter the path to the image file containing the QR code:")
-
+    println("=== QR Code Reader ===")
+    println("Entrez le chemin vers l'image contenant le QR code:")
+    
     val imagePath = readLine()
-    if (imagePath != null) {
-        val qrCodeReader = QRCodeReader()
-        val image = ImageUtils.loadImage(imagePath)
-
-        if (image != null) {
-            val result = qrCodeReader.readQRCode(image)
-            if (result != null) {
-                println("Decoded QR Code: $result")
-            } else {
-                println("No QR code found in the image.")
-            }
+    
+    if (imagePath.isNullOrBlank()) {
+        println("Erreur: Aucun chemin d'image fourni.")
+        return
+    }
+    
+    val imageFile = File(imagePath)
+    if (!imageFile.exists()) {
+        println("Erreur: Le fichier image n'existe pas: $imagePath")
+        return
+    }
+    
+    try {
+        val qrReader = QRCodeReader()
+        val result = qrReader.readQRCode(imageFile)
+        
+        if (result != null) {
+            println("QR Code détecté avec succès!")
+            println("Contenu: $result")
         } else {
-            println("Failed to load image. Please check the file path.")
+            println("Aucun QR code trouvé dans l'image.")
         }
-    } else {
-        println("No input provided.")
+    } catch (e: Exception) {
+        println("Erreur lors de la lecture du QR code: ${e.message}")
     }
 }
