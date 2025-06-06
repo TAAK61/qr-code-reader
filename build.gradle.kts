@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.9.10"
     application
-    id("org.jetbrains.dokka") version "1.9.10"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.qrcoder"
@@ -13,63 +11,29 @@ repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 dependencies {
-    // ZXing for QR code processing
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.google.zxing:javase:3.5.2")
     
-    // Kotlin standard library
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    
-    // Testing dependencies
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.mockito:mockito-core:5.5.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("junit:junit:4.13.2")
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("main.MainKt")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-    }
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "11"
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
-// Generate documentation
-tasks.dokkaHtml.configure {
-    outputDirectory.set(buildDir.resolve("dokka"))
-}
-
-// Create JAR with dependencies
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "MainKt"
-    }
-    
-    // Include dependencies in the JAR
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-// Configure test reporting
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-// Add JaCoCo for code coverage
-apply(plugin = "jacoco")
-
-tasks.jacocoTestReport {
-    reports {
-        xml.required = true
-        html.required = true
-    }
+tasks.shadowJar {
+    archiveBaseName.set("qr-code-reader")
+    archiveVersion.set("1.0")
+    archiveClassifier.set("all")
 }

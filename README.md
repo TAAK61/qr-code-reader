@@ -1,57 +1,78 @@
 # QR Code Reader
 
-## Description
-This project is a QR code reader application developed in Kotlin. It allows users to read QR codes from images and process them for enhanced detection and decoding.
+Un lecteur de QR Code robuste et efficace développé en Kotlin.
 
-## Project Structure
-```
-qr-code-reader
-├── src
-│   └── main
-│       └── kotlin
-│           ├── Main.kt
-│           ├── qr
-│           │   ├── QRCodeReader.kt
-│           │   └── QRCodeProcessor.kt
-│           └── utils
-│               └── ImageUtils.kt
-├── build.gradle.kts
-├── gradle.properties
-└── README.md
-```
+## 🚀 Fonctionnalités
 
-## Setup Instructions
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   ```
-2. Navigate to the project directory:
-   ```
-   cd qr-code-reader
-   ```
-3. Open the project in your preferred IDE.
+- Lecture de QR codes à partir d'images (PNG, JPG, etc.)
+- Interface en ligne de commande simple
+- Architecture modulaire et extensible
+- Tests unitaires complets
+- JAR exécutable autonome
 
-4. Build the project using Gradle:
-   ```
-   ./gradlew build
-   ```
+## 📦 Installation
 
-## Usage
-1. Run the application:
-   ```
-   ./gradlew run
-   ```
-2. Follow the prompts to load an image containing a QR code.
+### Prérequis
+- Java 11 ou supérieur
+- Gradle (optionnel, le wrapper est inclus)
 
-3. The application will decode the QR code and display the result.
+### Compilation
+`ash
+.\gradlew clean build
+`
 
-## Dependencies
-This project uses the following libraries:
-- ZXing (Zebra Crossing) for QR code reading.
-- Java AWT for image processing.
+### Exécution
+`ash
+java -jar build\libs\qr-code-reader-1.0-all.jar <chemin-vers-image>
+`
 
-## Contributing
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
+## 📖 Utilisation
 
-## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+`ash
+# Lire un QR code depuis une image
+java -jar qr-code-reader-1.0-all.jar mon-qr-code.png
+
+# Exemple de sortie
+QR Code Reader v1.0
+QR Code trouvé: https://github.com/votre-repo
+`
+
+## 🏗️ Architecture
+
+`
+src/
+├── main/kotlin/
+│   ├── main/
+│   │   └── Main.kt          # Point d'entrée
+│   └── qr/
+│       └── QRCodeReader.kt  # Logique principale
+└── test/kotlin/
+    └── QRCodeReaderTest.kt  # Tests unitaires
+`
+
+## 🧪 Tests
+
+`ash
+.\gradlew test
+`
+
+## 📋 Versions
+
+- **v1.0** (main) : Version stable de base
+- **v2.0-dev** (development) : Version avancée avec fonctionnalités étendues
+
+## 📄 Licence
+
+MIT License - voir le fichier LICENSE pour plus de détails.
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créez votre branche feature (git checkout -b feature/nouvelle-fonctionnalite)
+3. Committez vos changements (git commit -m 'Ajout nouvelle fonctionnalité')
+4. Push vers la branche (git push origin feature/nouvelle-fonctionnalite)
+5. Ouvrez une Pull Request
+
+---
+
+*Développé avec ❤️ en Kotlin*

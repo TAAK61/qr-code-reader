@@ -1,0 +1,26 @@
+# Editor configuration
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+indent_size = 4
+max_line_length = 120
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{json,js,ts}]
+indent_size = 2
+
+[*.{md,txt}]
+trim_trailing_whitespace = false
+
+[*.properties]
+end_of_line = lf

@@ -13,7 +13,7 @@ This document contains a prioritized list of tasks for improving the QR Code Rea
 7. [x] Add input validation for all public methods
 8. [x] Implement proper exception handling with custom exceptions
 9. [x] Add code style configuration file and enforce consistent formatting
-10. [ ] Refactor QRCodeProcessor to use dependency injection for better testability
+10. [x] Refactor QRCodeProcessor to use dependency injection for better testability
 
 ## Testing Improvements
 
@@ -43,16 +43,16 @@ This document contains a prioritized list of tasks for improving the QR Code Rea
 
 ## Build and Dependency Management
 
-31. [ ] Update Gradle wrapper to the latest version
-32. [ ] Configure Gradle to generate source and javadoc JARs
-33. [ ] Add dependency version management using Gradle version catalogs
-34. [ ] Configure Gradle to run static code analysis tools
-35. [ ] Add build tasks for different distribution formats (JAR, ZIP, etc.)
+31. [x] Update Gradle wrapper to the latest version
+32. [x] Configure Gradle to generate source and javadoc JARs
+33. [x] Add dependency version management using Gradle version catalogs
+34. [x] Configure Gradle to run static code analysis tools
+35. [x] Add build tasks for different distribution formats (JAR, ZIP, etc.)
 36. [ ] Configure continuous integration (CI) setup
-37. [ ] Add license headers to all source files
-38. [ ] Configure Gradle to generate build reports
-39. [ ] Add dependency vulnerability scanning to the build process
-40. [ ] Configure Gradle to publish artifacts to a repository
+37. [x] Add license headers to all source files
+38. [x] Configure Gradle to generate build reports
+39. [x] Add dependency vulnerability scanning to the build process
+40. [x] Configure Gradle to publish artifacts to a repository
 
 ## User Experience
 
