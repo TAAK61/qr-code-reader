@@ -1,0 +1,33 @@
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output
+out/
+target/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Java
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
