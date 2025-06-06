@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.qrcoder"
-version = "1.0.0"
+version = "2.0.0-dev"
 
 repositories {
     mavenCentral()
@@ -34,6 +34,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 tasks.shadowJar {
     archiveBaseName.set("qr-code-reader")
-    archiveVersion.set("1.0")
+    archiveVersion.set("2.0-dev")
     archiveClassifier.set("all")
 }
