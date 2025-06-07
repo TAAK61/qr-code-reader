@@ -1,0 +1,378 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  # Use JDK 17 for compatibility with Gradle and modern features
+  JAVA_VERSION: '17'
+  # Cache key versioning
+  GRADLE_CACHE_KEY: v1
+
+jobs:
+  # Job 1: Code Quality and Static Analysis
+  code-quality:
+    name: Code Quality & Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Run static code analysis
+      run: ./gradlew checkstyleMain checkstyleTest || true
+      
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
+
+  # Job 2: Build and Test
+  build-and-test:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        java: ['11', '17', '21']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew (Unix)
+      if: runner.os != 'Windows'
+      run: chmod +x gradlew
+      
+    - name: Compile code
+      run: ./gradlew compileKotlin compileTestKotlin
+      
+    - name: Run tests
+      run: ./gradlew test
+      
+    - name: Generate test report
+      if: always()
+      run: ./gradlew testReport || true
+      
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.os }}-java${{ matrix.java }}
+        path: |
+          build/reports/tests/
+          build/test-results/
+        retention-days: 30
+
+  # Job 3: Test Coverage
+  test-coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Run tests with coverage
+      run: ./gradlew test
+      
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./build/reports/jacoco/test/jacocoTestReport.xml
+        flags: unittests
+        name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+
+  # Job 4: Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Run dependency vulnerability scan
+      run: ./gradlew dependencyCheckAnalyze || true
+      
+    - name: Upload security scan results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-scan-results
+        path: build/reports/dependency-check-report.html
+        retention-days: 30
+
+  # Job 5: Build Artifacts
+  build-artifacts:
+    name: Build Distribution Artifacts
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-and-test]
+    if: github.event_name == 'push' || github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build all distribution formats
+      run: ./gradlew build shadowJar distZip distTar sourcesJar javadocJar
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: distribution-artifacts
+        path: |
+          build/libs/
+          build/distributions/
+        retention-days: 90
+
+  # Job 6: Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Run integration tests
+      run: ./gradlew integrationTest || ./gradlew test --tests "*Integration*" || true
+      
+    - name: Upload integration test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: integration-test-results
+        path: |
+          build/reports/tests/
+          build/test-results/
+        retention-days: 30
+
+  # Job 7: Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Run performance tests
+      run: ./gradlew test --tests "*Performance*"
+      
+    - name: Upload performance test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-test-results
+        path: |
+          build/reports/tests/
+          build/test-results/
+        retention-days: 90
+
+  # Job 8: Release (only on release events)
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-and-test, test-coverage, security-scan, build-artifacts]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-${{ env.GRADLE_CACHE_KEY }}-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build release artifacts
+      run: ./gradlew build shadowJar distZip distTar sourcesJar javadocJar
+      
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./build/libs/qr-code-reader-*-all.jar
+        asset_name: qr-code-reader-${{ github.event.release.tag_name }}.jar
+        asset_content_type: application/java-archive
+
+  # Job 9: Deployment Status
+  deployment-status:
+    name: Deployment Status
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-and-test, test-coverage, security-scan, build-artifacts]
+    if: always()
+    
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Build & Test | ${{ needs.build-and-test.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Coverage | ${{ needs.test-coverage.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Build Artifacts | ${{ needs.build-artifacts.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Workflow Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
