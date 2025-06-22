@@ -35,6 +35,10 @@ dependencies {
     implementation("org.openjfx:javafx-swing:17.0.2")
       // Webcam support
     implementation("com.github.sarxos:webcam-capture:0.3.12")
+    
+    // JSON processing for custom data formats (Task 79)
+    implementation("com.google.code.gson:gson:2.10.1")
+    
       // Testing dependencies - JUnit 5 for parameterized tests
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")

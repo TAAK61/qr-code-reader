@@ -8,19 +8,22 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.common.GlobalHistogramBinarizer
 import utils.ImageProcessor
+import utils.PerformanceProfiler
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
 /**
- * QRCodeReader class with optional plugin system integration, optimized image processing, and encryption support.
+ * QRCodeReader class with optional plugin system integration, optimized image processing, encryption support, and performance profiling.
  * 
  * This class maintains backward compatibility while providing optional
  * plugin system integration for enhanced barcode reading capabilities.
  * 
  * Task 25: Implement a plugin system for supporting different barcode formats
  * Task 51: Optimize the image processing pipeline for better performance
+ * Task 56: Profile the application to identify performance bottlenecks
  * Task 73: Add support for encrypted QR codes
+ * Task 77: Add support for reading damaged or partially visible QR codes
  */
 class QRCodeReader {
     private val reader = MultiFormatReader()
@@ -34,6 +37,16 @@ class QRCodeReader {
     // Image processing configuration
     private var imageProcessingOptions = ImageProcessor.ImageProcessingOptions()
     
+    // Enhanced reader for damaged QR codes
+    private val enhancedReader = EnhancedQRReader()
+    
+    // vCard and WiFi processors
+    val vCardProcessor = VCardProcessor
+    val wifiProcessor = WiFiProcessor
+    
+    // Batch exporter
+    val batchExporter = BatchExporter()
+
     /**
      * Configure image processing options for optimal QR code detection
      */
@@ -76,52 +89,60 @@ class QRCodeReader {
         }
     }
       /**
-     * Legacy QR code reading implementation with optimized image processing
+     * Legacy QR code reading implementation with optimized image processing and performance profiling
      * Kept for backward compatibility and as a fallback
      */
     private fun readQRCodeLegacy(imagePath: String): String {
-        val file = File(imagePath)
-        if (!file.exists()) {
-            throw IllegalArgumentException("Fichier non trouvé: $imagePath")
+        return PerformanceProfiler.measureOperation("readQRCodeFromFile") {
+            val file = File(imagePath)
+            if (!file.exists()) {
+                throw IllegalArgumentException("Fichier non trouvé: $imagePath")
+            }
+            
+            val image = PerformanceProfiler.measureOperation("imageLoad") {
+                ImageIO.read(file) ?: throw IllegalArgumentException("Image invalide")
+            }
+            readQRCodeLegacy(image)
         }
-        
-        val image = ImageIO.read(file) ?: throw IllegalArgumentException("Image invalide")
-        return readQRCodeLegacy(image)
     }
       /**
-     * Legacy QR code reading implementation for BufferedImage with image processing optimization
+     * Legacy QR code reading implementation for BufferedImage with image processing optimization and performance profiling
      */
     private fun readQRCodeLegacy(image: BufferedImage): String {
-        // Task 51: Apply optimized image processing pipeline
-        val processingResult = imageProcessor.processImage(image, imageProcessingOptions)
-        val optimizedImage = processingResult.processedImage
-        
-        val source = BufferedImageLuminanceSource(optimizedImage)
-        val bitmap = BinaryBitmap(HybridBinarizer(source))
-        
-        return try {
-            val result = reader.decode(bitmap)
-            result.text
-        } catch (e: NotFoundException) {
-            // Try with original image if processed image fails
-            try {
-                val originalSource = BufferedImageLuminanceSource(image)
-                val originalBitmap = BinaryBitmap(HybridBinarizer(originalSource))
-                val originalResult = reader.decode(originalBitmap)
-                originalResult.text
-            } catch (e2: NotFoundException) {
-                // Try with different binarizer
-                try {
-                    val globalSource = BufferedImageLuminanceSource(optimizedImage)
-                    val globalBitmap = BinaryBitmap(GlobalHistogramBinarizer(globalSource))
-                    val globalResult = reader.decode(globalBitmap)
-                    globalResult.text
-                } catch (e3: NotFoundException) {
-                    throw RuntimeException("Aucun QR code trouvé")
-                }
+        return PerformanceProfiler.measureOperation("readQRCodeFromBuffer") {
+            // Task 51: Apply optimized image processing pipeline with profiling
+            val processingResult = PerformanceProfiler.measureOperation("imageProcessing") {
+                imageProcessor.processImage(image, imageProcessingOptions)
             }
-        } catch (e: Exception) {
-            throw RuntimeException("Erreur lecture QR: ${e.message}")
+            val optimizedImage = processingResult.processedImage
+            
+            val source = BufferedImageLuminanceSource(optimizedImage)
+            val bitmap = BinaryBitmap(HybridBinarizer(source))
+            
+            return try {
+                val result = reader.decode(bitmap)
+                result.text
+            } catch (e: NotFoundException) {
+                // Try with original image if processed image fails
+                try {
+                    val originalSource = BufferedImageLuminanceSource(image)
+                    val originalBitmap = BinaryBitmap(HybridBinarizer(originalSource))
+                    val originalResult = reader.decode(originalBitmap)
+                    originalResult.text
+                } catch (e2: NotFoundException) {
+                    // Try with different binarizer
+                    try {
+                        val globalSource = BufferedImageLuminanceSource(optimizedImage)
+                        val globalBitmap = BinaryBitmap(GlobalHistogramBinarizer(globalSource))
+                        val globalResult = reader.decode(globalBitmap)
+                        globalResult.text
+                    } catch (e3: NotFoundException) {
+                        throw RuntimeException("Aucun QR code trouvé")
+                    }
+                }
+            } catch (e: Exception) {
+                throw RuntimeException("Erreur lecture QR: ${e.message}")
+            }
         }
     }
       /**
@@ -562,6 +583,97 @@ class QRCodeReader {
         } catch (e: Exception) {
             println("Failed to open URL: ${e.message}")
             false
+        }
+    }
+    
+    /**
+     * Read QR code with damage recovery support
+     * Task 77: Add support for reading damaged or partially visible QR codes
+     */
+    fun readQRCodeWithRecovery(image: BufferedImage): EnhancedQRReader.RecoveryResult {
+        return enhancedReader.readDamagedQRCode(image)
+    }
+    
+    /**
+     * Assess QR code damage level
+     */
+    fun assessQRCodeDamage(image: BufferedImage): Map<String, Any> {
+        return enhancedReader.assessQRCodeDamage(image)
+    }
+    
+    /**
+     * Enhanced QR code reading with all advanced features
+     */
+    fun readQRCodeAdvanced(
+        imagePath: String,
+        useRecovery: Boolean = false,
+        decryptionKey: javax.crypto.SecretKey? = null,
+        password: String? = null
+    ): QRReadResult {
+        return PerformanceProfiler.measureOperation("readQRCodeAdvanced") {
+            try {
+                val file = File(imagePath)
+                if (!file.exists()) {
+                    throw IllegalArgumentException("File not found: $imagePath")
+                }
+                
+                val image = ImageIO.read(file)
+                readQRCodeAdvanced(image, useRecovery, decryptionKey, password)
+            } catch (e: Exception) {
+                QRReadResult(
+                    content = "Error reading QR code: ${e.message}",
+                    metadata = mapOf("error" to (e.message ?: "Unknown error"))
+                )
+            }
+        }
+    }
+    
+    /**
+     * Enhanced QR code reading with all advanced features from BufferedImage
+     */
+    fun readQRCodeAdvanced(
+        image: BufferedImage,
+        useRecovery: Boolean = false,
+        decryptionKey: javax.crypto.SecretKey? = null,
+        password: String? = null
+    ): QRReadResult {
+        return PerformanceProfiler.measureOperation("readQRCodeAdvancedImage") {
+            // First try normal reading
+            try {
+                val normalResult = readQRCodeEnhanced(image, decryptionKey, password)
+                if (normalResult.content.isNotEmpty() && !normalResult.content.startsWith("Error")) {
+                    return@measureOperation normalResult
+                }
+            } catch (e: Exception) {
+                // Continue to recovery if normal reading fails
+            }
+            
+            // If normal reading failed and recovery is enabled, try enhanced recovery
+            if (useRecovery) {
+                val recoveryResult = enhancedReader.readDamagedQRCode(image)
+                if (recoveryResult.content != null) {
+                    val processedResult = processQRContent(recoveryResult.content, decryptionKey, password)
+                    return@measureOperation processedResult.copy(
+                        metadata = processedResult.metadata + mapOf(
+                            "recoveryUsed" to true,
+                            "recoveryMethod" to recoveryResult.method,
+                            "recoveryConfidence" to recoveryResult.confidence,
+                            "recoveryAttempts" to recoveryResult.attemptsUsed,
+                            "recoveryTimeMs" to recoveryResult.processingTimeMs
+                        )
+                    )
+                }
+            }
+            
+            // All methods failed
+            QRReadResult(
+                content = "Failed to read QR code",
+                metadata = mapOf(
+                    "error" to "All reading methods failed",
+                    "recoveryAttempted" to useRecovery,
+                    "damageAssessment" to if (useRecovery) enhancedReader.assessQRCodeDamage(image) else emptyMap<String, Any>()
+                )
+            )
         }
     }
 }
